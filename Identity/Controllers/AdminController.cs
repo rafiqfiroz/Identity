@@ -10,13 +10,15 @@ namespace Identity.Controllers
     {
         private readonly UserManager<AppUser> _userManager;
         private IPasswordHasher<AppUser> _passwordHasher;
-        private IPasswordValidator<AppUser> passwordValidator;
-        private IUserValidator<AppUser> userValidator;
+        private IPasswordValidator<AppUser> _passwordValidator;
+        private IUserValidator<AppUser> _userValidator;
 
-        public AdminController(UserManager<AppUser> userManager,IPasswordHasher<AppUser>passwordHasher)
+        public AdminController(UserManager<AppUser> userManager,IPasswordHasher<AppUser>passwordHasher,IPasswordValidator<AppUser>passwordValidator,IUserValidator<AppUser>userValidator)
         {
             _userManager = userManager;
             _passwordHasher = passwordHasher;
+            _passwordValidator = passwordValidator;
+            _userValidator = userValidator;
         }
         public IActionResult Index()
         {
@@ -103,7 +105,7 @@ namespace Identity.Controllers
                 IdentityResult validEmail = null;
                 if (!string.IsNullOrEmpty(email))
                 {
-                    validEmail = await userValidator.ValidateAsync(_userManager, user);
+                    validEmail = await _userValidator.ValidateAsync(_userManager, user);
                     if (validEmail.Succeeded)
                         user.Email = email;
                     else
@@ -115,7 +117,7 @@ namespace Identity.Controllers
                 IdentityResult validPass = null;
                 if (!string.IsNullOrEmpty(password))
                 {
-                    validPass = await passwordValidator.ValidateAsync(_userManager, user, password);
+                    validPass = await _passwordValidator.ValidateAsync(_userManager, user, password);
                     if (validPass.Succeeded)
                         user.PasswordHash = _passwordHasher.HashPassword(user, password);
                     else
